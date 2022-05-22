@@ -1,5 +1,4 @@
 from machine import Pin, UART
-
 import utime
 
 gpsModule = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1))
