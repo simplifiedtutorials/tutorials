@@ -1,4 +1,5 @@
 from machine import Pin, UART
+
 import utime
 
 gpsModule = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1))
@@ -31,7 +32,6 @@ def getGPS(gpsModule):
        
         parts = buff.split(',')
        
-        #b'$GPGGA,102525.00,0621.81904,S,10650.72673,E,1,06,2.88,78.8,M,1.4,M,,*42\r\n'
         if (parts[0] == "b'$GPGGA" and len(parts) == 15):
             sentence = "GGA"
             if(parts[1] and parts[2] and parts[3] and parts[4] and parts[5] and parts[6] and parts[7]):
@@ -47,7 +47,6 @@ def getGPS(gpsModule):
                 FIX_STATUS = True
                 break
         
-        #b'$GPRMC,093630.00,A,0621.82583,S,10650.72224,E,1.300,,220522,,,A*67\r\n'
         if (parts[0] == "b'$GPRMC" and len(parts) == 13):
             sentence = "RMC"
             if (parts[1] and parts[2] and parts[3] and parts[4] and parts[5] and parts[6]):
