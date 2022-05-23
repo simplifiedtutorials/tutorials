@@ -21,39 +21,31 @@ def convertToDegree(raw, flag):
     
     return degValue
 
+
 def printGPSData(d):
     if (d['longitude']):
-        print("===========================")
+        print("=====================================")
         print("    Longitude  : {:.6f}".format(d['longitude']))
-
     if (d['latitude']): 
         print("    Latitude   : {:.6f}".format(d['latitude']))
-        
-    if (d['altitude']):        
-        print("    Altitude   : " + d['altitude'] + " m")
-        
+    if (d['altitude']):
+        print("    Altitude   : {:.1f}".format(d['altitude']) + " m")
     if (d['hdop']):
         print("    HDOP       : " + d['hdop'])
-        
     if (d['satellites']):
         print("    Satellites : " + str(int(d['satellites'])))
-        
     if (d['gpstime']):
         print("    GPS time   : " + d['gpstime'])
-        
     if (d['speed']):
         if (d['speed'] != ""):
             print("    Speed      : " + d['speed'] + " knots")
-            
     if (d['course']):
         if (d['course'] != ""):
             print("    Course     : {:.1f} deg".format(float(d['course'])))
-            
     if (d['timestamp']):
         print("    Date/time  : " + d['timestamp'])
-    
     if (d['longitude']):
-        print("---------------------------")
+        print("-------------------------------------")
 
 
 def parseGPS(strNMEA):
@@ -82,6 +74,12 @@ def parseGPS(strNMEA):
             if (gpsData['longitude'] == None):
                 return None
             gpsData['altitude'] = parts[9]
+            try:
+                gpsData['altitude'] = float(gpsData['altitude'])
+            except:
+                gpsData['altitude'] = None
+                    
+            
             gpsData['satellites'] = parts[7]
             gpsData['hdop'] = parts[8]
             
@@ -89,6 +87,7 @@ def parseGPS(strNMEA):
     
     elif (parts[0] == "b'$GPRMC" and len(parts) == 13):
         if (parts[1] and parts[2] and parts[3] and parts[4] and parts[5] and parts[6]):
+            #print(buff)
             if (parts[2] == 'A'):
                 gpsData['latitude'] = convertToDegree(parts[3], parts[4])
                 if (gpsData['latitude'] == None):
