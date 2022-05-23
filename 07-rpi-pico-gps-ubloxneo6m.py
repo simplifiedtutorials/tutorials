@@ -116,4 +116,4 @@ while True:
     if (data):
         printGPSData(data)
     
-    utime.sleep(0.1)
+    utime.sleep(0.2)
