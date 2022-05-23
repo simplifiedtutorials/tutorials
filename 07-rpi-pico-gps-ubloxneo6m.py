@@ -96,21 +96,26 @@ def parseGPS(sentence):
                 gpsData['longitude'] = toDegree(parts[5], parts[6])
                 gpsData['speed'] = toFloat(parts[7])
                 gpsData['course'] = toFloat(parts[8])
-                date = '20' + toDate(parts[9]) 
+                date = toDate(parts[9])
+                if (date):
+                    date = '20' + date
                 time = toTime(parts[1])
                 if (time and date):
                     gpsData['timestamp'] = date + ' ' + time
                 else:
                     gpsData['timestamp'] = None
                     
-    return gpsData
+    if (gpsData['longitude'] and gpsData['latitude']):
+        return gpsData
+    else:
+        return None
 
 
 while True:
     buff = str(gps.readline())
-    print(buff)
+    #print(buff)
     data = parseGPS(buff)
     if (data):
         printGPSData(data)
     
-    utime.sleep(0.5)
+    utime.sleep(0.1)
