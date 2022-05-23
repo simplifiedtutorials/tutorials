@@ -6,10 +6,29 @@ gps = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1))
 buff = bytearray(255)
 
 
-def convertToDegree(raw, flag):
+def toFloat(s):
     try:
-        rawFloat = float(raw)
+        f = float(s)
+        return f
     except:
+        return None
+
+
+def toTime(s):
+    if (len(s) < 6):
+        return None
+    return s[0:2] + ":" + s[2:4] + ":" + s[4:6]
+
+
+def toDate(s):
+    if (len(s) < 6):
+        return None
+    return '20' + s[0:2] + '/' + s[2:4] + '/' + s[4:6]
+
+
+def toDegree(raw, flag):
+    rawFloat = toFloat(raw)
+    if (rawFloat == None):
         return None
     
     degPart = int(rawFloat/100) 
@@ -24,31 +43,29 @@ def convertToDegree(raw, flag):
 
 def printGPSData(d):
     if (d['longitude']):
-        print("=====================================")
+        print("======================================")
         print("    Longitude  : {:.6f}".format(d['longitude']))
     if (d['latitude']): 
         print("    Latitude   : {:.6f}".format(d['latitude']))
     if (d['altitude']):
         print("    Altitude   : {:.1f}".format(d['altitude']) + " m")
     if (d['hdop']):
-        print("    HDOP       : " + d['hdop'])
+        print("    HDOP       : {:.1f}".format(d['hdop']))
     if (d['satellites']):
-        print("    Satellites : " + str(int(d['satellites'])))
+        print("    Satellites : {:.0f}".format(d['satellites']))
     if (d['gpstime']):
         print("    GPS time   : " + d['gpstime'])
     if (d['speed']):
-        if (d['speed'] != ""):
-            print("    Speed      : " + d['speed'] + " knots")
+        print("    Speed      : {:.1f}".format(d['speed']) + " knots")
     if (d['course']):
-        if (d['course'] != ""):
-            print("    Course     : {:.1f} deg".format(float(d['course'])))
+        print("    Course     : {:.1f}".format(d['course']) + " deg")
     if (d['timestamp']):
         print("    Date/time  : " + d['timestamp'])
     if (d['longitude']):
-        print("-------------------------------------")
+        print("--------------------------------------")
 
 
-def parseGPS(strNMEA):
+def parseGPS(sentence):
     gpsData = {
         "latitude": None,
         "longitude": None,
@@ -61,45 +78,30 @@ def parseGPS(strNMEA):
         "altitude": None        
     }
     
-    parts = strNMEA.split(',')
+    parts = sentence.split(',')
    
     if (parts[0] == "b'$GPGGA" and len(parts) == 15):
         if(parts[1] and parts[2] and parts[3] and parts[4] and parts[5] and parts[6] and parts[7]):
-            #print(buff)
-            
-            gpsData['latitude'] = convertToDegree(parts[2], parts[3])
-            if (gpsData['latitude'] == None):
-                return None
-            gpsData['longitude'] = convertToDegree(parts[4], parts[5])
-            if (gpsData['longitude'] == None):
-                return None
-            gpsData['altitude'] = parts[9]
-            try:
-                gpsData['altitude'] = float(gpsData['altitude'])
-            except:
-                gpsData['altitude'] = None
-                    
-            
-            gpsData['satellites'] = parts[7]
-            gpsData['hdop'] = parts[8]
-            
-            gpsData['gpstime'] = parts[1][0:2] + ":" + parts[1][2:4] + ":" + parts[1][4:6]
+            gpsData['latitude'] = toDegree(parts[2], parts[3])
+            gpsData['longitude'] = toDegree(parts[4], parts[5])
+            gpsData['altitude'] = toFloat(parts[9])
+            gpsData['satellites'] = toFloat(parts[7])
+            gpsData['hdop'] = toFloat(parts[8])
+            gpsData['gpstime'] = toTime(parts[1])
     
     elif (parts[0] == "b'$GPRMC" and len(parts) == 13):
         if (parts[1] and parts[2] and parts[3] and parts[4] and parts[5] and parts[6]):
-            #print(buff)
             if (parts[2] == 'A'):
-                gpsData['latitude'] = convertToDegree(parts[3], parts[4])
-                if (gpsData['latitude'] == None):
-                    return None
-                gpsData['longitude'] = convertToDegree(parts[5], parts[6])
-                if (gpsData['longitude'] == None):
-                    return None
-                gpsData['speed'] = parts[7]
-                gpsData['course'] = parts[8]
-                date = '20' + parts[9][0:2] + '/' + parts[9][2:4] + '/' + parts[9][4:6] 
-                time = parts[1][0:2] + ":" + parts[1][2:4] + ":" + parts[1][4:6]
-                gpsData['timestamp'] = date + ' ' + time
+                gpsData['latitude'] = toDegree(parts[3], parts[4])
+                gpsData['longitude'] = toDegree(parts[5], parts[6])
+                gpsData['speed'] = toFloat(parts[7])
+                gpsData['course'] = toFloat(parts[8])
+                date = '20' + toDate(parts[9]) 
+                time = toTime(parts[1])
+                if (time and date):
+                    gpsData['timestamp'] = date + ' ' + time
+                else:
+                    gpsData['timestamp'] = None
                     
     return gpsData
 
