@@ -97,11 +97,9 @@ def parseGPS(sentence):
                 gpsData['speed'] = toFloat(parts[7])
                 gpsData['course'] = toFloat(parts[8])
                 date = toDate(parts[9])
-                if (date):
-                    date = '20' + date
                 time = toTime(parts[1])
                 if (time and date):
-                    gpsData['timestamp'] = date + ' ' + time
+                    gpsData['timestamp'] = '20' + date + ' ' + time
                 else:
                     gpsData['timestamp'] = None
                     
